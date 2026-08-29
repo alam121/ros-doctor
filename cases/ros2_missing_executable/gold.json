@@ -1,0 +1,4 @@
+{
+  "expected_rule": "ros2_missing_executable_entrypoint",
+  "root_cause": "Launch asks for serial_driver_node, but setup.py installs serial_node."
+}

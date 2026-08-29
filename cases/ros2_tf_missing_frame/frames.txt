@@ -1,0 +1,3 @@
+Frame odom exists with parent world.
+Frame base_link exists with parent odom.
+Frame map is missing.

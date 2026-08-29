@@ -1,0 +1,4 @@
+{
+  "expected_rule": "workspace_not_sourced",
+  "root_cause": "The package exists in the workspace, but ROS_PACKAGE_PATH only includes /opt/ros/noetic/share."
+}

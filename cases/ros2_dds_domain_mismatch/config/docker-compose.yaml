@@ -1,0 +1,7 @@
+services:
+  listener:
+    image: ros:humble
+    network_mode: bridge
+  talker:
+    image: ros:humble
+    network_mode: bridge

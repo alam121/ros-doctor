@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ros-doctor"
+version = "0.1.0"
+description = "Evidence-grounded agentic debugger for ROS and ROS2 failures."
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "ROS Doctor Hackathon Team"}]
+
+[project.scripts]
+ros-doctor = "ros_doctor.cli:main"
+ros-doctor-eval = "ros_doctor.evaluate:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

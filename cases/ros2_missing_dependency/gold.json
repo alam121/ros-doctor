@@ -1,0 +1,4 @@
+{
+  "expected_rule": "ros2_missing_runtime_dependency",
+  "root_cause": "depthimage_to_laserscan is referenced by the launch file but is not installed or declared in package.xml."
+}

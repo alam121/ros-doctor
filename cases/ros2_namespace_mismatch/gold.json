@@ -1,0 +1,4 @@
+{
+  "expected_rule": "ros2_namespace_or_topic_mismatch",
+  "root_cause": "The subscriber waits on /camera/image_raw while the available publisher is /robot1/camera/image_raw."
+}

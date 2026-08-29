@@ -1,0 +1,9 @@
+<package format="3">
+  <name>nav_stack</name>
+  <version>0.1.0</version>
+  <description>Navigation launch wrappers.</description>
+  <maintainer email="dev@example.com">Dev</maintainer>
+  <license>MIT</license>
+  <exec_depend>nav2_bringup</exec_depend>
+  <exec_depend>slam_toolbox</exec_depend>
+</package>

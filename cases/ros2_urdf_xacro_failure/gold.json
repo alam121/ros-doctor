@@ -1,0 +1,4 @@
+{
+  "expected_rule": "urdf_or_xacro_parse_failure",
+  "root_cause": "The robot xacro has malformed XML: a visual block is closed with collision."
+}

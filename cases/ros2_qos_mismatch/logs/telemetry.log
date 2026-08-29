@@ -1,0 +1,2 @@
+[WARN] [mission_monitor]: New publisher discovered on /battery_state, offering incompatible QoS. Last incompatible policy: RELIABILITY_QOS_POLICY
+[WARN] [mission_monitor]: subscription matched zero endpoints because reliability policy differs

@@ -1,0 +1,4 @@
+{
+  "expected_rule": "tf_frame_or_clock_failure",
+  "root_cause": "Navigation expects map -> base_link transforms, but the map frame is absent from the TF tree."
+}

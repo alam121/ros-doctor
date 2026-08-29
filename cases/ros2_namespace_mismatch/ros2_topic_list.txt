@@ -1,0 +1,3 @@
+/robot1/camera/image_raw [sensor_msgs/msg/Image]
+/robot1/camera/camera_info [sensor_msgs/msg/CameraInfo]
+/detections [vision_msgs/msg/Detection2DArray]

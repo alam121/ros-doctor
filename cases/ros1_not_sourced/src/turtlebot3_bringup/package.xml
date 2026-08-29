@@ -1,0 +1,7 @@
+<package format="2">
+  <name>turtlebot3_bringup</name>
+  <version>1.2.0</version>
+  <description>Example ROS1 bringup package present in the workspace.</description>
+  <maintainer email="dev@example.com">Dev</maintainer>
+  <license>BSD</license>
+</package>

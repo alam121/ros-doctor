@@ -1,0 +1,5 @@
+lidar_driver:
+  ros__parameters:
+    port: /dev/ttyUSB0
+    scan_rate: "10.0"
+    frame_id: laser

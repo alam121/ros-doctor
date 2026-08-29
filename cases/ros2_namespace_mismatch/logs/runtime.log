@@ -1,0 +1,3 @@
+[INFO] [camera_filter]: waiting for message on /camera/image_raw
+[WARN] [camera_filter]: no publishers matched requested input topic after 30 seconds
+[INFO] [detector]: publishing detections only after receiving images

@@ -1,0 +1,2 @@
+[ERROR] [launch_ros.actions.node]: executable 'serial_driver_node' not found on the libexec directory '/home/dev/ws/install/robot_driver/lib/robot_driver'
+[ERROR] [launch]: process failed before node startup

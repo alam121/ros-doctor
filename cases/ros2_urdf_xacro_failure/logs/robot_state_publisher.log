@@ -1,0 +1,2 @@
+[ERROR] [robot_state_publisher]: xacro: error: XML parsing error: mismatched tag: line 14, column 4
+[ERROR] [launch]: robot_description command failed while evaluating robot.urdf.xacro

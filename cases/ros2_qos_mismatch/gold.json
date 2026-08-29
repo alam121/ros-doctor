@@ -1,0 +1,4 @@
+{
+  "expected_rule": "ros2_qos_policy_mismatch",
+  "root_cause": "The publisher offers BEST_EFFORT while the subscriber requires RELIABLE."
+}

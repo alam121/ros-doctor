@@ -1,0 +1,3 @@
+[roslaunch][ERROR] Resource not found: turtlebot3_bringup
+[roslaunch][INFO] ROS_MASTER_URI=http://localhost:11311
+[rospack] Error: package 'turtlebot3_bringup' not found

@@ -1,0 +1,2 @@
+[ERROR] [lidar_driver]: InvalidParameterTypeException: parameter scan_rate has invalid type, expected double got string
+[ERROR] [launch]: failed to parse parameter file for node lidar_driver

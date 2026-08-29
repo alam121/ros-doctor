@@ -1,0 +1,4 @@
+{
+  "expected_rule": "ros2_dds_domain_or_network_mismatch",
+  "root_cause": "Talker and listener run with different ROS_DOMAIN_ID values, so DDS discovery cannot match them."
+}

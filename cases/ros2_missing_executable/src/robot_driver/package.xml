@@ -1,0 +1,8 @@
+<package format="3">
+  <name>robot_driver</name>
+  <version>0.1.0</version>
+  <description>Robot driver package.</description>
+  <maintainer email="dev@example.com">Dev</maintainer>
+  <license>MIT</license>
+  <buildtool_depend>ament_python</buildtool_depend>
+</package>

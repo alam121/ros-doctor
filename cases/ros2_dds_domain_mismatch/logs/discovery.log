@@ -1,0 +1,3 @@
+[INFO] [talker]: publishing /chatter at 10 Hz
+[WARN] [listener]: no nodes discovered after startup
+[WARN] [rmw_cyclonedds_cpp]: participant discovery timed out; check ROS_DOMAIN_ID and multicast reachability

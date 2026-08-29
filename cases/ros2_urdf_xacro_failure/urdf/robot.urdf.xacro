@@ -1,0 +1,9 @@
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="badbot">
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <mesh filename="package://badbot/meshes/base.stl"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>

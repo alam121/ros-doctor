@@ -1,0 +1,3 @@
+[WARN] [controller_server]: Timed out waiting for transform from base_link to map
+[ERROR] [bt_navigator]: Invalid frame ID "map" passed to canTransform argument target_frame - frame does not exist
+[INFO] [robot_state_publisher]: publishing fixed transforms for base_link and laser

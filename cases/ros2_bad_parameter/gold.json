@@ -1,0 +1,4 @@
+{
+  "expected_rule": "ros2_parameter_type_or_name_mismatch",
+  "root_cause": "scan_rate is declared as a numeric parameter but supplied as a quoted string."
+}

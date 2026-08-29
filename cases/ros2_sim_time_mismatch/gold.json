@@ -1,0 +1,4 @@
+{
+  "expected_rule": "tf_frame_or_clock_failure",
+  "root_cause": "The node uses simulation time, but /clock is not being published, causing transform timestamps to be rejected."
+}
