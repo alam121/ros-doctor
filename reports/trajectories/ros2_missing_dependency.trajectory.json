@@ -1,0 +1,341 @@
+{
+  "case_path": "cases/ros2_missing_dependency",
+  "mode": "offline",
+  "predicted_rule": "ros2_missing_runtime_dependency",
+  "trajectory": [
+    {
+      "actor": "offline_agent_driver",
+      "action": "request_competing_hypotheses",
+      "note": "Offline mode skips the LLM call but preserves the tool-using control flow for tests."
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "collect_evidence",
+        "files": [
+          "cases/ros2_missing_dependency/env.txt",
+          "cases/ros2_missing_dependency/logs/launch.log",
+          "cases/ros2_missing_dependency/src/nav_stack/launch/bringup.launch.py",
+          "cases/ros2_missing_dependency/src/nav_stack/package.xml"
+        ],
+        "file_count": 4
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "infer_ros_version",
+        "ros_version": "ros2"
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "list_candidate_hypotheses",
+        "ros_version": "ros2",
+        "hypotheses": [
+          {
+            "id": "ros2_missing_runtime_dependency",
+            "title": "ROS2 package dependency is missing or not declared",
+            "root_cause": "A node or launch file imports/executes a package that is not installed, not built, or not declared in package.xml."
+          },
+          {
+            "id": "ros2_namespace_or_topic_mismatch",
+            "title": "ROS2 topic or namespace mismatch",
+            "root_cause": "Publisher and subscriber names do not resolve to the same fully qualified topic, often because remaps, namespaces, or leading slashes differ."
+          },
+          {
+            "id": "workspace_not_sourced",
+            "title": "Workspace or ROS environment was not sourced",
+            "root_cause": "The shell environment cannot see ROS packages because setup.bash/local_setup.bash was not sourced, or ROS_PACKAGE_PATH/AMENT_PREFIX_PATH points at the wrong workspace."
+          },
+          {
+            "id": "ros2_dds_domain_or_network_mismatch",
+            "title": "ROS2 DDS domain or network discovery mismatch",
+            "root_cause": "ROS2 nodes are running but cannot discover each other because ROS_DOMAIN_ID, RMW implementation, host networking, or multicast settings differ."
+          },
+          {
+            "id": "tf_frame_or_clock_failure",
+            "title": "TF frame, timestamp, or simulation clock failure",
+            "root_cause": "Transforms are unavailable or rejected because frame IDs, timestamps, or use_sim_time settings are inconsistent."
+          },
+          {
+            "id": "ros2_parameter_type_or_name_mismatch",
+            "title": "ROS2 parameter name or type mismatch",
+            "root_cause": "A launch file or YAML config provides a parameter name or value type that does not match what the node declares or expects."
+          },
+          {
+            "id": "ros2_missing_executable_entrypoint",
+            "title": "ROS2 executable or entry point is missing",
+            "root_cause": "The package exists, but the executable named by launch or ros2 run is not installed because setup.py/CMake install rules or console_scripts are wrong."
+          },
+          {
+            "id": "urdf_or_xacro_parse_failure",
+            "title": "URDF or xacro parse failure",
+            "root_cause": "Robot description generation fails because a URDF/xacro file has malformed XML, an undefined xacro property/macro, or an invalid mesh/reference path."
+          },
+          {
+            "id": "ros2_qos_policy_mismatch",
+            "title": "ROS2 QoS policy mismatch",
+            "root_cause": "A publisher and subscriber are on the same topic but use incompatible QoS policies such as reliability, durability, or history depth."
+          }
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_missing_runtime_dependency",
+        "score": 0.48,
+        "confidence": "medium",
+        "confirming_evidence": [
+          {
+            "path": "cases/ros2_missing_dependency/logs/launch.log",
+            "line": 2,
+            "signal": "confirm:package .* not found",
+            "snippet": "[ERROR] [launch]: Caught exception in launch: \"package 'depthimage_to_laserscan' not found, searching: ['/home/dev/ws/install/nav_stack', '/opt/ros/humble']\""
+          }
+        ],
+        "supporting_context": [
+          {
+            "path": "cases/ros2_missing_dependency/src/nav_stack/launch/bringup.launch.py",
+            "line": 1,
+            "signal": "context:import ",
+            "snippet": "from launch import LaunchDescription"
+          },
+          {
+            "path": "cases/ros2_missing_dependency/src/nav_stack/launch/bringup.launch.py",
+            "line": 2,
+            "signal": "context:import ",
+            "snippet": "from launch_ros.actions import Node"
+          },
+          {
+            "path": "cases/ros2_missing_dependency/src/nav_stack/package.xml",
+            "line": 7,
+            "signal": "context:exec_depend",
+            "snippet": "<exec_depend>nav2_bringup</exec_depend>"
+          },
+          {
+            "path": "cases/ros2_missing_dependency/src/nav_stack/package.xml",
+            "line": 7,
+            "signal": "context:depend>",
+            "snippet": "<exec_depend>nav2_bringup</exec_depend>"
+          },
+          {
+            "path": "cases/ros2_missing_dependency/src/nav_stack/package.xml",
+            "line": 8,
+            "signal": "context:exec_depend",
+            "snippet": "<exec_depend>slam_toolbox</exec_depend>"
+          },
+          {
+            "path": "cases/ros2_missing_dependency/src/nav_stack/package.xml",
+            "line": 8,
+            "signal": "context:depend>",
+            "snippet": "<exec_depend>slam_toolbox</exec_depend>"
+          }
+        ],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "rosdep install --from-paths src --ignore-src -r -y",
+          "colcon build --symlink-install",
+          "source install/setup.bash",
+          "ros2 pkg prefix <missing_package>"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "workspace_not_sourced",
+        "score": 0.32,
+        "confidence": "low",
+        "confirming_evidence": [
+          {
+            "path": "cases/ros2_missing_dependency/logs/launch.log",
+            "line": 2,
+            "signal": "confirm:package .* not found",
+            "snippet": "[ERROR] [launch]: Caught exception in launch: \"package 'depthimage_to_laserscan' not found, searching: ['/home/dev/ws/install/nav_stack', '/opt/ros/humble']\""
+          }
+        ],
+        "supporting_context": [
+          {
+            "path": "cases/ros2_missing_dependency/env.txt",
+            "line": 1,
+            "signal": "context:ROS_DISTRO=",
+            "snippet": "ROS_DISTRO=humble"
+          },
+          {
+            "path": "cases/ros2_missing_dependency/env.txt",
+            "line": 2,
+            "signal": "context:AMENT_PREFIX_PATH=",
+            "snippet": "AMENT_PREFIX_PATH=/home/dev/ws/install/nav_stack:/opt/ros/humble"
+          }
+        ],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "echo $ROS_DISTRO",
+          "echo $AMENT_PREFIX_PATH",
+          "echo $ROS_PACKAGE_PATH",
+          "source /opt/ros/<distro>/setup.bash && source install/setup.bash"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_missing_executable_entrypoint",
+        "score": 0.04,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [
+          {
+            "path": "cases/ros2_missing_dependency/src/nav_stack/launch/bringup.launch.py",
+            "line": 9,
+            "signal": "context:executable=",
+            "snippet": "executable=\"depthimage_to_laserscan_node\","
+          }
+        ],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 pkg executables <package>",
+          "colcon build --symlink-install",
+          "source install/setup.bash",
+          "ros2 run <package> <executable>"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_namespace_or_topic_mismatch",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 node list",
+          "ros2 node info <node_name>",
+          "ros2 topic list -t",
+          "ros2 topic echo <expected_topic> --once"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_dds_domain_or_network_mismatch",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "echo $ROS_DOMAIN_ID",
+          "echo $RMW_IMPLEMENTATION",
+          "ros2 doctor --report",
+          "ros2 multicast receive"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "tf_frame_or_clock_failure",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 run tf2_tools view_frames",
+          "ros2 topic echo /tf --once",
+          "ros2 param get <node_name> use_sim_time",
+          "ros2 topic echo /clock --once"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_parameter_type_or_name_mismatch",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 param list <node_name>",
+          "ros2 param describe <node_name> <parameter>",
+          "ros2 param get <node_name> <parameter>",
+          "ros2 launch <package> <launch_file> --show-args"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "urdf_or_xacro_parse_failure",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "xacro <robot>.urdf.xacro",
+          "check_urdf <robot>.urdf",
+          "ros2 param get /robot_state_publisher robot_description",
+          "ros2 run tf2_tools view_frames"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_qos_policy_mismatch",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 topic info <topic> --verbose",
+          "ros2 topic echo <topic> --qos-reliability best_effort",
+          "ros2 topic echo <topic> --qos-reliability reliable",
+          "ros2 doctor --report"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "attempt_to_disprove",
+        "leading_hypothesis_id": "ros2_missing_runtime_dependency",
+        "leading_score": 0.48,
+        "strongest_alternative": {
+          "id": "workspace_not_sourced",
+          "title": "Workspace or ROS environment was not sourced",
+          "score": 0.32,
+          "confidence": "low"
+        },
+        "margin": 0.16,
+        "disproved": false,
+        "decision": "keep_leading"
+      }
+    },
+    {
+      "actor": "offline_agent_driver",
+      "action": "select_verified_leader",
+      "predicted_rule": "ros2_missing_runtime_dependency"
+    }
+  ]
+}

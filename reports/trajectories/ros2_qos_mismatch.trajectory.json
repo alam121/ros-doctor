@@ -1,0 +1,339 @@
+{
+  "case_path": "cases/ros2_qos_mismatch",
+  "mode": "offline",
+  "predicted_rule": "ros2_qos_policy_mismatch",
+  "trajectory": [
+    {
+      "actor": "offline_agent_driver",
+      "action": "request_competing_hypotheses",
+      "note": "Offline mode skips the LLM call but preserves the tool-using control flow for tests."
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "collect_evidence",
+        "files": [
+          "cases/ros2_qos_mismatch/logs/telemetry.log",
+          "cases/ros2_qos_mismatch/ros2_topic_info.txt",
+          "cases/ros2_qos_mismatch/src/telemetry/monitor.py"
+        ],
+        "file_count": 3
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "infer_ros_version",
+        "ros_version": "ros2"
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "list_candidate_hypotheses",
+        "ros_version": "ros2",
+        "hypotheses": [
+          {
+            "id": "ros2_missing_runtime_dependency",
+            "title": "ROS2 package dependency is missing or not declared",
+            "root_cause": "A node or launch file imports/executes a package that is not installed, not built, or not declared in package.xml."
+          },
+          {
+            "id": "ros2_namespace_or_topic_mismatch",
+            "title": "ROS2 topic or namespace mismatch",
+            "root_cause": "Publisher and subscriber names do not resolve to the same fully qualified topic, often because remaps, namespaces, or leading slashes differ."
+          },
+          {
+            "id": "workspace_not_sourced",
+            "title": "Workspace or ROS environment was not sourced",
+            "root_cause": "The shell environment cannot see ROS packages because setup.bash/local_setup.bash was not sourced, or ROS_PACKAGE_PATH/AMENT_PREFIX_PATH points at the wrong workspace."
+          },
+          {
+            "id": "ros2_dds_domain_or_network_mismatch",
+            "title": "ROS2 DDS domain or network discovery mismatch",
+            "root_cause": "ROS2 nodes are running but cannot discover each other because ROS_DOMAIN_ID, RMW implementation, host networking, or multicast settings differ."
+          },
+          {
+            "id": "tf_frame_or_clock_failure",
+            "title": "TF frame, timestamp, or simulation clock failure",
+            "root_cause": "Transforms are unavailable or rejected because frame IDs, timestamps, or use_sim_time settings are inconsistent."
+          },
+          {
+            "id": "ros2_parameter_type_or_name_mismatch",
+            "title": "ROS2 parameter name or type mismatch",
+            "root_cause": "A launch file or YAML config provides a parameter name or value type that does not match what the node declares or expects."
+          },
+          {
+            "id": "ros2_missing_executable_entrypoint",
+            "title": "ROS2 executable or entry point is missing",
+            "root_cause": "The package exists, but the executable named by launch or ros2 run is not installed because setup.py/CMake install rules or console_scripts are wrong."
+          },
+          {
+            "id": "urdf_or_xacro_parse_failure",
+            "title": "URDF or xacro parse failure",
+            "root_cause": "Robot description generation fails because a URDF/xacro file has malformed XML, an undefined xacro property/macro, or an invalid mesh/reference path."
+          },
+          {
+            "id": "ros2_qos_policy_mismatch",
+            "title": "ROS2 QoS policy mismatch",
+            "root_cause": "A publisher and subscriber are on the same topic but use incompatible QoS policies such as reliability, durability, or history depth."
+          }
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_qos_policy_mismatch",
+        "score": 0.92,
+        "confidence": "high",
+        "confirming_evidence": [
+          {
+            "path": "cases/ros2_qos_mismatch/logs/telemetry.log",
+            "line": 1,
+            "signal": "confirm:incompatible QoS",
+            "snippet": "[WARN] [mission_monitor]: New publisher discovered on /battery_state, offering incompatible QoS. Last incompatible policy: RELIABILITY_QOS_POLICY"
+          },
+          {
+            "path": "cases/ros2_qos_mismatch/logs/telemetry.log",
+            "line": 1,
+            "signal": "confirm:New publisher discovered.*incompatible",
+            "snippet": "[WARN] [mission_monitor]: New publisher discovered on /battery_state, offering incompatible QoS. Last incompatible policy: RELIABILITY_QOS_POLICY"
+          },
+          {
+            "path": "cases/ros2_qos_mismatch/logs/telemetry.log",
+            "line": 2,
+            "signal": "confirm:reliability policy",
+            "snippet": "[WARN] [mission_monitor]: subscription matched zero endpoints because reliability policy differs"
+          }
+        ],
+        "supporting_context": [
+          {
+            "path": "cases/ros2_qos_mismatch/ros2_topic_info.txt",
+            "line": 4,
+            "signal": "context:BEST_EFFORT",
+            "snippet": "Publisher reliability: BEST_EFFORT"
+          },
+          {
+            "path": "cases/ros2_qos_mismatch/ros2_topic_info.txt",
+            "line": 5,
+            "signal": "context:RELIABLE",
+            "snippet": "Subscription reliability: RELIABLE"
+          },
+          {
+            "path": "cases/ros2_qos_mismatch/src/telemetry/monitor.py",
+            "line": 1,
+            "signal": "context:QoSProfile",
+            "snippet": "from rclpy.qos import QoSProfile, ReliabilityPolicy"
+          },
+          {
+            "path": "cases/ros2_qos_mismatch/src/telemetry/monitor.py",
+            "line": 3,
+            "signal": "context:QoSProfile",
+            "snippet": "battery_qos = QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE)"
+          },
+          {
+            "path": "cases/ros2_qos_mismatch/src/telemetry/monitor.py",
+            "line": 3,
+            "signal": "context:RELIABLE",
+            "snippet": "battery_qos = QoSProfile(depth=10, reliability=ReliabilityPolicy.RELIABLE)"
+          }
+        ],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 topic info <topic> --verbose",
+          "ros2 topic echo <topic> --qos-reliability best_effort",
+          "ros2 topic echo <topic> --qos-reliability reliable",
+          "ros2 doctor --report"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_namespace_or_topic_mismatch",
+        "score": 0.08,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [
+          {
+            "path": "cases/ros2_qos_mismatch/ros2_topic_info.txt",
+            "line": 1,
+            "signal": "context:topic",
+            "snippet": "Topic: /battery_state"
+          },
+          {
+            "path": "cases/ros2_qos_mismatch/src/telemetry/monitor.py",
+            "line": 4,
+            "signal": "context:create_subscription",
+            "snippet": "node.create_subscription(BatteryState, \"/battery_state\", cb, battery_qos)"
+          }
+        ],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 node list",
+          "ros2 node info <node_name>",
+          "ros2 topic list -t",
+          "ros2 topic echo <expected_topic> --once"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_missing_runtime_dependency",
+        "score": 0.04,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [
+          {
+            "path": "cases/ros2_qos_mismatch/src/telemetry/monitor.py",
+            "line": 1,
+            "signal": "context:import ",
+            "snippet": "from rclpy.qos import QoSProfile, ReliabilityPolicy"
+          }
+        ],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "rosdep install --from-paths src --ignore-src -r -y",
+          "colcon build --symlink-install",
+          "source install/setup.bash",
+          "ros2 pkg prefix <missing_package>"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "workspace_not_sourced",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "echo $ROS_DISTRO",
+          "echo $AMENT_PREFIX_PATH",
+          "echo $ROS_PACKAGE_PATH",
+          "source /opt/ros/<distro>/setup.bash && source install/setup.bash"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_dds_domain_or_network_mismatch",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "echo $ROS_DOMAIN_ID",
+          "echo $RMW_IMPLEMENTATION",
+          "ros2 doctor --report",
+          "ros2 multicast receive"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "tf_frame_or_clock_failure",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 run tf2_tools view_frames",
+          "ros2 topic echo /tf --once",
+          "ros2 param get <node_name> use_sim_time",
+          "ros2 topic echo /clock --once"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_parameter_type_or_name_mismatch",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 param list <node_name>",
+          "ros2 param describe <node_name> <parameter>",
+          "ros2 param get <node_name> <parameter>",
+          "ros2 launch <package> <launch_file> --show-args"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_missing_executable_entrypoint",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 pkg executables <package>",
+          "colcon build --symlink-install",
+          "source install/setup.bash",
+          "ros2 run <package> <executable>"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "urdf_or_xacro_parse_failure",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "xacro <robot>.urdf.xacro",
+          "check_urdf <robot>.urdf",
+          "ros2 param get /robot_state_publisher robot_description",
+          "ros2 run tf2_tools view_frames"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "attempt_to_disprove",
+        "leading_hypothesis_id": "ros2_qos_policy_mismatch",
+        "leading_score": 0.92,
+        "strongest_alternative": {
+          "id": "ros2_namespace_or_topic_mismatch",
+          "title": "ROS2 topic or namespace mismatch",
+          "score": 0.08,
+          "confidence": "low"
+        },
+        "margin": 0.84,
+        "disproved": false,
+        "decision": "keep_leading"
+      }
+    },
+    {
+      "actor": "offline_agent_driver",
+      "action": "select_verified_leader",
+      "predicted_rule": "ros2_qos_policy_mismatch"
+    }
+  ]
+}

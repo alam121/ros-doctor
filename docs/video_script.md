@@ -6,7 +6,7 @@ ROS debugging is rarely solved by the first error line. A missing topic, launch 
 
 ## 0:35-1:10 Baseline
 
-Show the baseline result from `reports/evaluation.md`: a simple first-error mapper gets 5 of 10 cases correct. Explain that this represents a common workflow: look at the most visible error and jump to a likely cause.
+Show the baseline design: a one-shot general LLM receives the same evidence bundle but cannot call verification tools or attempt to disprove its answer. Explain that this represents a common workflow: paste logs and snippets into a chatbot once and accept the first plausible diagnosis.
 
 ## 1:10-2:30 Live Run
 
@@ -14,7 +14,7 @@ Run:
 
 ```bash
 cd /Users/ALAMSM/Documents/Project/ros-doctor
-PYTHONPATH=src python3 -m ros_doctor.cli diagnose cases/ros2_missing_executable
+PYTHONPATH=src python3 -m ros_doctor.cli agent-diagnose cases/ros2_missing_executable --offline --trajectory-output reports/trajectories/ros2_missing_executable.trajectory.json
 ```
 
 Point out the agent loop:
@@ -22,8 +22,8 @@ Point out the agent loop:
 - Evidence files collected.
 - ROS version inferred.
 - Candidate hypotheses generated.
-- Confirming/supporting evidence gathered.
-- Weak candidates rejected.
+- Deterministic verifier tools called for each candidate.
+- Leading diagnosis challenged against the strongest alternative.
 - Final hypotheses ranked.
 
 Show that the launch file asks for `serial_driver_node`, while `setup.py` installs `serial_node`.
@@ -37,15 +37,22 @@ Explain the recommended fix: add the correct console script or update the launch
 Run:
 
 ```bash
-PYTHONPATH=src python3 -m ros_doctor.evaluate cases --write-diagnoses
+PYTHONPATH=src python3 -m ros_doctor.evaluate cases --baseline-mode none --agent-mode offline --write-diagnoses
 ```
 
 Show:
 
 - 10 cases.
-- Baseline accuracy: 0.50.
+- Baseline marked `not run` in this environment because `OPENAI_API_KEY` was unavailable.
 - ROS Doctor accuracy: 1.00.
-- Average evidence count: 7.40 for the top diagnosis.
+- Average evidence count: 8.10 for the top diagnosis.
+
+Then show the command for the real LLM comparison:
+
+```bash
+export OPENAI_API_KEY=...
+PYTHONPATH=src python3 -m ros_doctor.evaluate cases --baseline-mode one-shot-llm --agent-mode llm --write-diagnoses
+```
 
 ## 4:15-4:45 Removed/Changed Experiment
 

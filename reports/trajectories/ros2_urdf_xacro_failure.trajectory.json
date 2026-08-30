@@ -1,0 +1,348 @@
+{
+  "case_path": "cases/ros2_urdf_xacro_failure",
+  "mode": "offline",
+  "predicted_rule": "urdf_or_xacro_parse_failure",
+  "trajectory": [
+    {
+      "actor": "offline_agent_driver",
+      "action": "request_competing_hypotheses",
+      "note": "Offline mode skips the LLM call but preserves the tool-using control flow for tests."
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "collect_evidence",
+        "files": [
+          "cases/ros2_urdf_xacro_failure/logs/robot_state_publisher.log",
+          "cases/ros2_urdf_xacro_failure/urdf/robot.urdf.xacro"
+        ],
+        "file_count": 2
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "infer_ros_version",
+        "ros_version": "unknown"
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "list_candidate_hypotheses",
+        "ros_version": "unknown",
+        "hypotheses": [
+          {
+            "id": "ros2_missing_runtime_dependency",
+            "title": "ROS2 package dependency is missing or not declared",
+            "root_cause": "A node or launch file imports/executes a package that is not installed, not built, or not declared in package.xml."
+          },
+          {
+            "id": "ros2_namespace_or_topic_mismatch",
+            "title": "ROS2 topic or namespace mismatch",
+            "root_cause": "Publisher and subscriber names do not resolve to the same fully qualified topic, often because remaps, namespaces, or leading slashes differ."
+          },
+          {
+            "id": "workspace_not_sourced",
+            "title": "Workspace or ROS environment was not sourced",
+            "root_cause": "The shell environment cannot see ROS packages because setup.bash/local_setup.bash was not sourced, or ROS_PACKAGE_PATH/AMENT_PREFIX_PATH points at the wrong workspace."
+          },
+          {
+            "id": "ros2_dds_domain_or_network_mismatch",
+            "title": "ROS2 DDS domain or network discovery mismatch",
+            "root_cause": "ROS2 nodes are running but cannot discover each other because ROS_DOMAIN_ID, RMW implementation, host networking, or multicast settings differ."
+          },
+          {
+            "id": "tf_frame_or_clock_failure",
+            "title": "TF frame, timestamp, or simulation clock failure",
+            "root_cause": "Transforms are unavailable or rejected because frame IDs, timestamps, or use_sim_time settings are inconsistent."
+          },
+          {
+            "id": "ros1_master_or_uri_mismatch",
+            "title": "ROS1 master URI or hostname mismatch",
+            "root_cause": "ROS1 nodes cannot register or communicate because ROS_MASTER_URI, ROS_HOSTNAME, or ROS_IP is unset or points to the wrong host."
+          },
+          {
+            "id": "ros2_parameter_type_or_name_mismatch",
+            "title": "ROS2 parameter name or type mismatch",
+            "root_cause": "A launch file or YAML config provides a parameter name or value type that does not match what the node declares or expects."
+          },
+          {
+            "id": "ros2_missing_executable_entrypoint",
+            "title": "ROS2 executable or entry point is missing",
+            "root_cause": "The package exists, but the executable named by launch or ros2 run is not installed because setup.py/CMake install rules or console_scripts are wrong."
+          },
+          {
+            "id": "urdf_or_xacro_parse_failure",
+            "title": "URDF or xacro parse failure",
+            "root_cause": "Robot description generation fails because a URDF/xacro file has malformed XML, an undefined xacro property/macro, or an invalid mesh/reference path."
+          },
+          {
+            "id": "ros2_qos_policy_mismatch",
+            "title": "ROS2 QoS policy mismatch",
+            "root_cause": "A publisher and subscriber are on the same topic but use incompatible QoS policies such as reliability, durability, or history depth."
+          }
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "urdf_or_xacro_parse_failure",
+        "score": 0.88,
+        "confidence": "high",
+        "confirming_evidence": [
+          {
+            "path": "cases/ros2_urdf_xacro_failure/logs/robot_state_publisher.log",
+            "line": 1,
+            "signal": "confirm:xacro: error",
+            "snippet": "[ERROR] [robot_state_publisher]: xacro: error: XML parsing error: mismatched tag: line 14, column 4"
+          },
+          {
+            "path": "cases/ros2_urdf_xacro_failure/logs/robot_state_publisher.log",
+            "line": 1,
+            "signal": "confirm:XML parsing error",
+            "snippet": "[ERROR] [robot_state_publisher]: xacro: error: XML parsing error: mismatched tag: line 14, column 4"
+          },
+          {
+            "path": "cases/ros2_urdf_xacro_failure/logs/robot_state_publisher.log",
+            "line": 1,
+            "signal": "confirm:mismatched tag",
+            "snippet": "[ERROR] [robot_state_publisher]: xacro: error: XML parsing error: mismatched tag: line 14, column 4"
+          }
+        ],
+        "supporting_context": [
+          {
+            "path": "cases/ros2_urdf_xacro_failure/logs/robot_state_publisher.log",
+            "line": 1,
+            "signal": "context:robot_state_publisher",
+            "snippet": "[ERROR] [robot_state_publisher]: xacro: error: XML parsing error: mismatched tag: line 14, column 4"
+          },
+          {
+            "path": "cases/ros2_urdf_xacro_failure/logs/robot_state_publisher.log",
+            "line": 2,
+            "signal": "context:robot_description",
+            "snippet": "[ERROR] [launch]: robot_description command failed while evaluating robot.urdf.xacro"
+          },
+          {
+            "path": "cases/ros2_urdf_xacro_failure/urdf/robot.urdf.xacro",
+            "line": 1,
+            "signal": "context:<robot",
+            "snippet": "<robot xmlns:xacro=\"http://www.ros.org/wiki/xacro\" name=\"badbot\">"
+          },
+          {
+            "path": "cases/ros2_urdf_xacro_failure/urdf/robot.urdf.xacro",
+            "line": 5,
+            "signal": "context:mesh filename",
+            "snippet": "<mesh filename=\"package://badbot/meshes/base.stl\"/>"
+          }
+        ],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "xacro <robot>.urdf.xacro",
+          "check_urdf <robot>.urdf",
+          "ros2 param get /robot_state_publisher robot_description",
+          "ros2 run tf2_tools view_frames"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "tf_frame_or_clock_failure",
+        "score": 0.08,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [
+          {
+            "path": "cases/ros2_urdf_xacro_failure/logs/robot_state_publisher.log",
+            "line": 1,
+            "signal": "context:robot_state_publisher",
+            "snippet": "[ERROR] [robot_state_publisher]: xacro: error: XML parsing error: mismatched tag: line 14, column 4"
+          },
+          {
+            "path": "cases/ros2_urdf_xacro_failure/urdf/robot.urdf.xacro",
+            "line": 2,
+            "signal": "context:\\bbase_link\\b",
+            "snippet": "<link name=\"base_link\">"
+          }
+        ],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 run tf2_tools view_frames",
+          "ros2 topic echo /tf --once",
+          "ros2 param get <node_name> use_sim_time",
+          "ros2 topic echo /clock --once"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_missing_runtime_dependency",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "rosdep install --from-paths src --ignore-src -r -y",
+          "colcon build --symlink-install",
+          "source install/setup.bash",
+          "ros2 pkg prefix <missing_package>"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_namespace_or_topic_mismatch",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 node list",
+          "ros2 node info <node_name>",
+          "ros2 topic list -t",
+          "ros2 topic echo <expected_topic> --once"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "workspace_not_sourced",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "echo $ROS_DISTRO",
+          "echo $AMENT_PREFIX_PATH",
+          "echo $ROS_PACKAGE_PATH",
+          "source /opt/ros/<distro>/setup.bash && source install/setup.bash"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_dds_domain_or_network_mismatch",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "echo $ROS_DOMAIN_ID",
+          "echo $RMW_IMPLEMENTATION",
+          "ros2 doctor --report",
+          "ros2 multicast receive"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros1_master_or_uri_mismatch",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "echo $ROS_MASTER_URI",
+          "echo $ROS_IP",
+          "rosnode list",
+          "rostopic list"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_parameter_type_or_name_mismatch",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 param list <node_name>",
+          "ros2 param describe <node_name> <parameter>",
+          "ros2 param get <node_name> <parameter>",
+          "ros2 launch <package> <launch_file> --show-args"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_missing_executable_entrypoint",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 pkg executables <package>",
+          "colcon build --symlink-install",
+          "source install/setup.bash",
+          "ros2 run <package> <executable>"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros2_qos_policy_mismatch",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 topic info <topic> --verbose",
+          "ros2 topic echo <topic> --qos-reliability best_effort",
+          "ros2 topic echo <topic> --qos-reliability reliable",
+          "ros2 doctor --report"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "attempt_to_disprove",
+        "leading_hypothesis_id": "urdf_or_xacro_parse_failure",
+        "leading_score": 0.88,
+        "strongest_alternative": {
+          "id": "tf_frame_or_clock_failure",
+          "title": "TF frame, timestamp, or simulation clock failure",
+          "score": 0.08,
+          "confidence": "low"
+        },
+        "margin": 0.8,
+        "disproved": false,
+        "decision": "keep_leading"
+      }
+    },
+    {
+      "actor": "offline_agent_driver",
+      "action": "select_verified_leader",
+      "predicted_rule": "urdf_or_xacro_parse_failure"
+    }
+  ]
+}

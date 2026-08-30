@@ -1,0 +1,236 @@
+{
+  "case_path": "cases/ros1_not_sourced",
+  "mode": "offline",
+  "predicted_rule": "workspace_not_sourced",
+  "trajectory": [
+    {
+      "actor": "offline_agent_driver",
+      "action": "request_competing_hypotheses",
+      "note": "Offline mode skips the LLM call but preserves the tool-using control flow for tests."
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "collect_evidence",
+        "files": [
+          "cases/ros1_not_sourced/env.txt",
+          "cases/ros1_not_sourced/logs/roslaunch.log",
+          "cases/ros1_not_sourced/src/turtlebot3_bringup/package.xml"
+        ],
+        "file_count": 3
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "infer_ros_version",
+        "ros_version": "ros1"
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "list_candidate_hypotheses",
+        "ros_version": "ros1",
+        "hypotheses": [
+          {
+            "id": "workspace_not_sourced",
+            "title": "Workspace or ROS environment was not sourced",
+            "root_cause": "The shell environment cannot see ROS packages because setup.bash/local_setup.bash was not sourced, or ROS_PACKAGE_PATH/AMENT_PREFIX_PATH points at the wrong workspace."
+          },
+          {
+            "id": "tf_frame_or_clock_failure",
+            "title": "TF frame, timestamp, or simulation clock failure",
+            "root_cause": "Transforms are unavailable or rejected because frame IDs, timestamps, or use_sim_time settings are inconsistent."
+          },
+          {
+            "id": "ros1_master_or_uri_mismatch",
+            "title": "ROS1 master URI or hostname mismatch",
+            "root_cause": "ROS1 nodes cannot register or communicate because ROS_MASTER_URI, ROS_HOSTNAME, or ROS_IP is unset or points to the wrong host."
+          },
+          {
+            "id": "urdf_or_xacro_parse_failure",
+            "title": "URDF or xacro parse failure",
+            "root_cause": "Robot description generation fails because a URDF/xacro file has malformed XML, an undefined xacro property/macro, or an invalid mesh/reference path."
+          }
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "workspace_not_sourced",
+        "score": 0.88,
+        "confidence": "high",
+        "confirming_evidence": [
+          {
+            "path": "cases/ros1_not_sourced/logs/roslaunch.log",
+            "line": 1,
+            "signal": "confirm:Resource not found",
+            "snippet": "[roslaunch][ERROR] Resource not found: turtlebot3_bringup"
+          },
+          {
+            "path": "cases/ros1_not_sourced/logs/roslaunch.log",
+            "line": 3,
+            "signal": "confirm:package .* not found",
+            "snippet": "[rospack] Error: package 'turtlebot3_bringup' not found"
+          },
+          {
+            "path": "cases/ros1_not_sourced/logs/roslaunch.log",
+            "line": 3,
+            "signal": "confirm:rospack.*Error",
+            "snippet": "[rospack] Error: package 'turtlebot3_bringup' not found"
+          }
+        ],
+        "supporting_context": [
+          {
+            "path": "cases/ros1_not_sourced/env.txt",
+            "line": 1,
+            "signal": "context:ROS_DISTRO=",
+            "snippet": "ROS_DISTRO=noetic"
+          },
+          {
+            "path": "cases/ros1_not_sourced/env.txt",
+            "line": 3,
+            "signal": "context:ROS_PACKAGE_PATH=",
+            "snippet": "ROS_PACKAGE_PATH=/opt/ros/noetic/share"
+          },
+          {
+            "path": "cases/ros1_not_sourced/env.txt",
+            "line": 4,
+            "signal": "context:setup.bash",
+            "snippet": "# Expected workspace path /home/dev/catkin_ws/src is absent because devel/setup.bash was not sourced."
+          },
+          {
+            "path": "cases/ros1_not_sourced/env.txt",
+            "line": 4,
+            "signal": "context:devel/setup.bash",
+            "snippet": "# Expected workspace path /home/dev/catkin_ws/src is absent because devel/setup.bash was not sourced."
+          }
+        ],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "echo $ROS_DISTRO",
+          "echo $AMENT_PREFIX_PATH",
+          "echo $ROS_PACKAGE_PATH",
+          "source /opt/ros/<distro>/setup.bash && source install/setup.bash"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "ros1_master_or_uri_mismatch",
+        "score": 0.64,
+        "confidence": "medium",
+        "confirming_evidence": [
+          {
+            "path": "cases/ros1_not_sourced/env.txt",
+            "line": 2,
+            "signal": "confirm:ROS_MASTER_URI",
+            "snippet": "ROS_MASTER_URI=http://localhost:11311"
+          },
+          {
+            "path": "cases/ros1_not_sourced/logs/roslaunch.log",
+            "line": 2,
+            "signal": "confirm:ROS_MASTER_URI",
+            "snippet": "[roslaunch][INFO] ROS_MASTER_URI=http://localhost:11311"
+          }
+        ],
+        "supporting_context": [
+          {
+            "path": "cases/ros1_not_sourced/env.txt",
+            "line": 2,
+            "signal": "context:localhost",
+            "snippet": "ROS_MASTER_URI=http://localhost:11311"
+          },
+          {
+            "path": "cases/ros1_not_sourced/env.txt",
+            "line": 2,
+            "signal": "context:master",
+            "snippet": "ROS_MASTER_URI=http://localhost:11311"
+          },
+          {
+            "path": "cases/ros1_not_sourced/logs/roslaunch.log",
+            "line": 2,
+            "signal": "context:localhost",
+            "snippet": "[roslaunch][INFO] ROS_MASTER_URI=http://localhost:11311"
+          },
+          {
+            "path": "cases/ros1_not_sourced/logs/roslaunch.log",
+            "line": 2,
+            "signal": "context:master",
+            "snippet": "[roslaunch][INFO] ROS_MASTER_URI=http://localhost:11311"
+          }
+        ],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "echo $ROS_MASTER_URI",
+          "echo $ROS_IP",
+          "rosnode list",
+          "rostopic list"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "tf_frame_or_clock_failure",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "ros2 run tf2_tools view_frames",
+          "ros2 topic echo /tf --once",
+          "ros2 param get <node_name> use_sim_time",
+          "ros2 topic echo /clock --once"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "verify_hypothesis",
+        "hypothesis_id": "urdf_or_xacro_parse_failure",
+        "score": 0.0,
+        "confidence": "low",
+        "confirming_evidence": [],
+        "supporting_context": [],
+        "refuting_evidence": [],
+        "verification_checks": [
+          "xacro <robot>.urdf.xacro",
+          "check_urdf <robot>.urdf",
+          "ros2 param get /robot_state_publisher robot_description",
+          "ros2 run tf2_tools view_frames"
+        ]
+      }
+    },
+    {
+      "actor": "verification_tool",
+      "result": {
+        "tool": "attempt_to_disprove",
+        "leading_hypothesis_id": "workspace_not_sourced",
+        "leading_score": 0.88,
+        "strongest_alternative": {
+          "id": "ros1_master_or_uri_mismatch",
+          "title": "ROS1 master URI or hostname mismatch",
+          "score": 0.64,
+          "confidence": "medium"
+        },
+        "margin": 0.24,
+        "disproved": false,
+        "decision": "keep_leading"
+      }
+    },
+    {
+      "actor": "offline_agent_driver",
+      "action": "select_verified_leader",
+      "predicted_rule": "workspace_not_sourced"
+    }
+  ]
+}

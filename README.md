@@ -1,6 +1,6 @@
 # ROS Doctor
 
-ROS Doctor is an agentic debugging system for ROS and ROS2 failures. It diagnoses failures by generating root-cause hypotheses and verifying them against logs, configuration, command output, and repository evidence instead of guessing from one error message.
+ROS Doctor is an evidence-driven agent that diagnoses ROS failures by generating competing root-cause hypotheses, using tools to gather evidence, and attempting to disprove its own leading diagnosis before recommending a fix.
 
 ## Intended User
 
@@ -10,11 +10,12 @@ ROS Doctor is for robotics engineers, lab teams, students, and field operators w
 
 - Scans a case folder containing logs, ROS command output, launch/config files, and package manifests.
 - Infers whether the case is ROS1, ROS2, or unknown.
-- Generates ranked root-cause hypotheses from a ruleset.
+- Uses a real LLM agent wrapper when `OPENAI_API_KEY` is set.
+- Uses deterministic rules as verification tools, not as the agent itself.
 - Collects confirming, supporting, and refuting evidence with file and line references.
 - Recommends fix steps and verification commands.
-- Evaluates the final system against a simple baseline on reproducible cases.
-- Includes an explicit agent verification loop in every report.
+- Evaluates the final system against a one-shot general LLM baseline when an API key is available.
+- Records tool-call trajectories for every evaluated case.
 
 ## Quick Start
 
@@ -23,32 +24,43 @@ cd /Users/ALAMSM/Documents/Project/ros-doctor
 PYTHONPATH=src python3 -m ros_doctor.cli diagnose cases/ros2_missing_dependency
 ```
 
-Write a report:
+Run the tool-using agent in offline verification mode:
 
 ```bash
-PYTHONPATH=src python3 -m ros_doctor.cli diagnose cases/ros2_namespace_mismatch --output reports/example.md
+PYTHONPATH=src python3 -m ros_doctor.cli agent-diagnose cases/ros2_qos_mismatch --offline --trajectory-output reports/trajectories/ros2_qos_mismatch.trajectory.json
 ```
 
-Run the benchmark:
+Run the real LLM agent:
 
 ```bash
-PYTHONPATH=src python3 -m ros_doctor.evaluate cases --write-diagnoses
+export OPENAI_API_KEY=...
+PYTHONPATH=src python3 -m ros_doctor.cli agent-diagnose cases/ros2_qos_mismatch --trajectory-output reports/trajectories/ros2_qos_mismatch.llm.trajectory.json
+```
+
+Run the one-shot general LLM baseline:
+
+```bash
+export OPENAI_API_KEY=...
+PYTHONPATH=src python3 -m ros_doctor.cli llm-baseline cases/ros2_qos_mismatch --output reports/llm-baselines/ros2_qos_mismatch.json
+```
+
+Run the 10-case evaluation without external LLM calls:
+
+```bash
+PYTHONPATH=src python3 -m ros_doctor.evaluate cases --baseline-mode none --agent-mode offline --write-diagnoses
+```
+
+Run the 10-case evaluation with the one-shot LLM baseline and LLM agent:
+
+```bash
+export OPENAI_API_KEY=...
+PYTHONPATH=src python3 -m ros_doctor.evaluate cases --baseline-mode one-shot-llm --agent-mode llm --write-diagnoses
 ```
 
 Run tests without third-party dependencies:
 
 ```bash
 python3 tests/run_tests.py
-```
-
-If you prefer an installed CLI:
-
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
-python3 -m pip install -e .
-ros-doctor diagnose cases/ros2_missing_dependency
-ros-doctor-eval cases --write-diagnoses
 ```
 
 ## Case Folder Format
@@ -69,16 +81,25 @@ For benchmark cases, add `gold.json`:
 }
 ```
 
-## Baseline
+## Four Major Changes
 
-The included baseline simulates a reasonable basic approach: inspect the first relevant error-like line and map it directly to a likely category. This is intentionally simple and brittle. ROS Doctor improves on it by checking multiple evidence sources before ranking the diagnosis.
+1. Added a real tool-using LLM agent around the existing engine.
+2. Converted deterministic rules into explicit verification tools.
+3. Replaced the intentionally weak first-error baseline with a one-shot general LLM baseline.
+4. Reran 10 evaluation cases and wrote per-case tool trajectories.
 
-Current benchmark result across 10 reproducible cases:
+## Baseline And Evaluation
 
-| Metric | Simple Baseline | ROS Doctor | Change |
-| --- | ---: | ---: | ---: |
-| Top diagnosis accuracy | 0.50 | 1.00 | +0.50 |
-| Evidence attached to top diagnosis | 0 | 7.50 avg | +7.50 |
+The baseline is now a one-shot general LLM prompt. It receives the same case evidence as ROS Doctor but does not call verification tools and does not attempt to disprove its own leading diagnosis.
+
+The checked-in evaluation was rerun in offline agent mode because this environment did not have `OPENAI_API_KEY`. That run still executes the same deterministic verification tools and records trajectories, but skips the LLM proposal/synthesis calls.
+
+Current checked-in evaluation across 10 reproducible cases:
+
+| Metric | One-Shot LLM Baseline | ROS Doctor Offline Agent | Notes |
+| --- | ---: | ---: | --- |
+| Top diagnosis accuracy | not run | 1.00 | LLM run requires `OPENAI_API_KEY`. |
+| Evidence attached to top diagnosis | not run | 8.10 avg | From verification tool trajectories. |
 
 See `reports/evaluation.md` after running the benchmark.
 
@@ -99,13 +120,13 @@ Included failure families:
 
 | Stage | What changed and why | Evidence | Decision |
 | --- | --- | --- | --- |
-| Baseline | First-error mapping from log text to root-cause category. | Correct on simple missing dependency and namespace cases, wrong on ROS1 unsourced workspace. | Kept as the comparison baseline. |
+| Baseline | One-shot general LLM prompt reads the same evidence bundle but cannot call tools. | Implemented in `src/ros_doctor/llm_baseline.py`; requires `OPENAI_API_KEY` for live runs. | Kept as the fair comparison baseline. |
 | Iteration 1 | Added evidence collection across logs, environment dumps, launch files, source snippets, and package manifests. | Reports include file and line references for each hypothesis. | Kept because it makes diagnoses auditable. |
 | Iteration 2 | Added ROS-version inference to avoid ranking ROS1-only failures against ROS2-only rules. | ROS1 case ranks workspace sourcing above ROS2-specific categories. | Kept. |
 | Iteration 3 | Tuned rule scoring so environment variables are context, not confirmation by themselves. | Missing-dependency case ranks dependency cause above unsourced workspace. | Kept because it reduces plausible-but-wrong diagnoses. |
 | Iteration 4 | Expanded the rule library to cover parameters, executable entry points, URDF/xacro, QoS, DDS, TF, and simulation time. | Benchmark grew from 3 to 10 cases while preserving top-ranked accuracy. | Kept because it makes the system credible across common ROS failure modes. |
-| Iteration 5 | Added an explicit agent verification loop to reports. | Diagnosis reports now show collection, version inference, hypothesis generation, verification, rejection, and ranking steps. | Kept because judges can inspect the agent trajectory instead of only the output. |
-| Final | Combined hypothesis generation, evidence verification, Markdown/JSON reporting, trajectories, and benchmark evaluation. | `python3 tests/run_tests.py` passes and benchmark reports 1.00 ROS Doctor accuracy on 10 included cases. | Ready for demo and submission packaging. |
+| Iteration 5 | Wrapped the verifier tools with an LLM-driven agent flow: propose competing hypotheses, run tools, attempt disproof, synthesize diagnosis. | `agent-diagnose` command writes a Markdown report and JSON trajectory. | Kept because it separates agent reasoning from deterministic verification. |
+| Final | Replaced the weak baseline with one-shot LLM baseline support and reran 10 cases in offline tool-agent mode. | `python3 tests/run_tests.py` passes and benchmark reports 1.00 ROS Doctor accuracy on 10 included cases. | Ready for keyed LLM baseline run and demo recording. |
 
 ## Main Failure Mode and Hot Take
 
@@ -116,19 +137,22 @@ Hot take: agentic debugging becomes useful when the agent is forced to disprove 
 ## Reproducibility Notes
 
 - Python: 3.10 or newer.
-- Runtime dependencies: none for the core tool.
+- Runtime dependencies: none for offline verification.
+- LLM runtime: set `OPENAI_API_KEY`; uses the OpenAI Responses API over HTTPS.
 - Optional test dependency: `pytest`, though `tests/run_tests.py` uses only the standard library.
 - Approximate runtime: less than one second for the included cases.
-- Approximate cost: zero for the deterministic local version.
+- Approximate cost: zero for offline mode; live LLM mode depends on the selected model and token usage.
 
 ## Submission Checklist
 
 - Complete solution code: included under `src/ros_doctor`.
-- Baseline: included in `src/ros_doctor/evaluate.py`.
+- LLM agent: included in `src/ros_doctor/agent.py`.
+- Verification tools: included in `src/ros_doctor/verifier_tools.py`.
+- One-shot LLM baseline: included in `src/ros_doctor/llm_baseline.py`.
 - Evaluation: 10 gold-labeled cases under `cases`.
 - Reproduction guide: included in this README.
 - Improvement changelog: included in this README.
-- Agent trajectories: included in `docs/agent_trajectories.md` and diagnosis reports.
+- Agent trajectories: generated under `reports/trajectories`.
 - Video plan: included in `docs/video_script.md`.
 - Private data: none; all cases are synthetic.
 
